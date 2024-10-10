@@ -1,0 +1,64 @@
+import { NextFunction, Request, Response } from "express";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import { User } from "../modules/user/user.model";
+import { catchError } from "./catchErrors";
+import { AppError } from "../utils/appError";
+import { IRoles, Roles } from "../modules/user/Roles";
+
+// user signing up
+const signUp = catchError(
+  async (req: Request, res: Response, next: NextFunction) => {
+    let Admins = ["amr@gamil.com"];
+    let user = await User.findOne({ email: req.body.email });
+    if (user)
+      return next(new AppError("email already exist please login", 403));
+    // if the user is in the admins list signhim up as an admin
+    if (Admins.includes(req.body.email))req.body.role = Roles.ADMIN;
+  
+      req.body.password = bcrypt.hashSync(req.body.password, 10);
+      user=  await User.create(req.body);
+      let token = jwt.sign(
+        {
+          userId: user!._id,
+          name: user!.name,
+          email: user!.email,
+          role: user!.role,
+        },
+        "secret"
+      );
+      return res.status(201).json({ message: "success", token });
+    }
+  
+);
+const login = catchError(
+  async (req: Request, res: Response, next: NextFunction) => {
+    let user = await User.findOne({ email: req.body.email });
+
+    if (!user || !bcrypt.compare(req.body.password, user.password!))
+      return next(new AppError("incorrect email or password", 403));
+    // sign a token
+    let token = jwt.sign(
+      { userId: user._id, name: user.name, email: user.email,role:user.role },
+      "secret"
+    );
+    return res
+      .status(201)
+      .json({ message: `welcome back ${user.name}`, token });
+  }
+);
+const allowedTo=function(...roles:string[]){
+
+  return catchError(async(req:Request,res:Response,next:NextFunction)=>{
+    if(!roles.includes(req.user!.role))
+     return next(new AppError('you are not authorized',401))
+   next()
+     
+   })
+ } 
+
+ export{
+  signUp,
+  login,
+  allowedTo
+ }
