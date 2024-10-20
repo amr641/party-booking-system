@@ -10,6 +10,7 @@ const appError_1 = require("../../utils/appError");
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 const Roles_1 = require("../user/Roles");
+const apiFeatures_1 = require("../../utils/apiFeatures");
 const addVenue = (0, catchErrors_1.catchError)(async (req, res, next) => {
     req.body.user = req.user?.userId;
     if (req.files) {
@@ -22,8 +23,14 @@ const addVenue = (0, catchErrors_1.catchError)(async (req, res, next) => {
 });
 exports.addVenue = addVenue;
 const getAllVenues = (0, catchErrors_1.catchError)(async (req, res, next) => {
-    let venues = await venue_model_1.Venue.find();
-    res.status(200).json({ message: "success", venues });
+    let apiFeatuers = new apiFeatures_1.ApiFeatures(venue_model_1.Venue.find(), req.query)
+        .select()
+        .filter()
+        .sort()
+        .search();
+    let { page, limit } = apiFeatuers;
+    let venues = await apiFeatuers.mongooseQuery;
+    res.status(200).json({ message: "success", page, limit, venues });
 });
 exports.getAllVenues = getAllVenues;
 const getVenue = (0, catchErrors_1.catchError)(async (req, res, next) => {
@@ -41,6 +48,7 @@ const updateVenue = (0, catchErrors_1.catchError)(async (req, res, next) => {
     // if the owner provide a photes in Update endpoint
     if (req.files) {
         const oldPhotos = venue?.photos;
+        // loop through the old images and remove it from its folder
         oldPhotos.forEach((photo) => {
             const photoPath = path_1.default.resolve() + "/src/uploads/venues/" + photo;
             if (fs_1.default.existsSync(photoPath)) {
@@ -64,7 +72,7 @@ const deleteVenue = (0, catchErrors_1.catchError)(async (req, res, next) => {
             return next(new appError_1.AppError("un authorized", 403));
     }
     await venue_model_1.Venue.deleteOne({ _id: venue._id });
-    // remove the old images 
+    // remove the old images
     const oldPhotos = venue?.photos;
     oldPhotos.forEach((photo) => {
         const photoPath = path_1.default.resolve() + "/src/uploads/venues/" + photo;

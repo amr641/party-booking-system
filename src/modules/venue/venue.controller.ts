@@ -5,6 +5,7 @@ import { AppError } from "../../utils/appError";
 import path from "path";
 import fs from "fs";
 import { Roles } from "../user/Roles";
+import { ApiFeatures, Query } from "../../utils/apiFeatures";
 
 const addVenue = catchError(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -20,10 +21,20 @@ const addVenue = catchError(
     res.status(200).json({ message: "success", venue });
   }
 );
+
 const getAllVenues = catchError(
   async (req: Request, res: Response, next: NextFunction) => {
-    let venues = await Venue.find();
-    res.status(200).json({ message: "success", venues });
+    let apiFeatuers = new ApiFeatures(
+      Venue.find(),
+      req.query as unknown as Query
+    )
+      .select()
+      .filter()
+      .sort()
+      .search();
+    let { page, limit } = apiFeatuers;
+    let venues = await apiFeatuers.mongooseQuery;
+    res.status(200).json({ message: "success", page, limit ,venues });
   }
 );
 const getVenue = catchError(
@@ -42,6 +53,7 @@ const updateVenue = catchError(
     // if the owner provide a photes in Update endpoint
     if (req.files) {
       const oldPhotos = venue?.photos;
+      // loop through the old images and remove it from its folder
       oldPhotos.forEach((photo) => {
         const photoPath = path.resolve() + "/src/uploads/venues/" + photo;
         if (fs.existsSync(photoPath)) {
@@ -68,7 +80,7 @@ const deleteVenue = catchError(
     }
 
     await Venue.deleteOne({ _id: venue._id });
-    // remove the old images 
+    // remove the old images
     const oldPhotos = venue?.photos;
     oldPhotos.forEach((photo) => {
       const photoPath = path.resolve() + "/src/uploads/venues/" + photo;
