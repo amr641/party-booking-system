@@ -4,22 +4,38 @@ import { Roles } from "../user/Roles";
 import { verfifyToken } from "../../middlewares/verifiyToken";
 import * as vc from "./venue.controller";
 import { uploadPhotos } from "../../fileUpload/fileUpload";
+import {
+  createVenueValidation,
+  getVenueValidation,
+  updateVenueValidation,
+} from "./venue.validator";
+import { validateRequest } from "../../middlewares/validate-request";
 
 export const venueRouter = Router();
 venueRouter
   .use(verfifyToken)
   .post(
     "/venues",
-    allowedTo(Roles.OWNER),
     uploadPhotos("venues", "photos"),
+    allowedTo(Roles.OWNER),
+    createVenueValidation,
+    validateRequest,
     vc.addVenue
   )
   .get("/venues", vc.getAllVenues)
-  .get("/venues/:id", vc.getVenue)
+  .get("/venues/:id", getVenueValidation, validateRequest, vc.getVenue)
   .patch(
     "/venues/:id",
-    allowedTo(Roles.OWNER),
     uploadPhotos("venues", "photos"),
+    allowedTo(Roles.OWNER),
+    updateVenueValidation,
+    validateRequest,
     vc.updateVenue
   )
-  .delete("/venues/:id", allowedTo(Roles.OWNER, Roles.ADMIN), vc.deleteVenue);
+  .delete(
+    "/venues/:id",
+    getVenueValidation,
+    validateRequest,
+    allowedTo(Roles.OWNER, Roles.ADMIN),
+    vc.deleteVenue
+  );

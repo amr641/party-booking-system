@@ -17,7 +17,7 @@ const venueSchema = new Schema(
     },
     price: {
       type: Number,
-      // required: true,
+      required: true,
     },
     availability: {
       type: [Date],

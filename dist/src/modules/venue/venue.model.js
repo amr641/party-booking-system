@@ -18,7 +18,7 @@ const venueSchema = new mongoose_2.Schema({
     },
     price: {
         type: Number,
-        // required: true,
+        required: true,
     },
     availability: {
         type: [Date],

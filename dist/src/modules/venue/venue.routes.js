@@ -30,11 +30,13 @@ const Roles_1 = require("../user/Roles");
 const verifiyToken_1 = require("../../middlewares/verifiyToken");
 const vc = __importStar(require("./venue.controller"));
 const fileUpload_1 = require("../../fileUpload/fileUpload");
+const venue_validator_1 = require("./venue.validator");
+const validate_request_1 = require("../../middlewares/validate-request");
 exports.venueRouter = (0, express_1.Router)();
 exports.venueRouter
     .use(verifiyToken_1.verfifyToken)
-    .post("/venues", (0, auth_1.allowedTo)(Roles_1.Roles.OWNER), (0, fileUpload_1.uploadPhotos)("venues", "photos"), vc.addVenue)
+    .post("/venues", (0, fileUpload_1.uploadPhotos)("venues", "photos"), (0, auth_1.allowedTo)(Roles_1.Roles.OWNER), venue_validator_1.createVenueValidation, validate_request_1.validateRequest, vc.addVenue)
     .get("/venues", vc.getAllVenues)
-    .get("/venues/:id", vc.getVenue)
-    .patch("/venues/:id", (0, auth_1.allowedTo)(Roles_1.Roles.OWNER), (0, fileUpload_1.uploadPhotos)("venues", "photos"), vc.updateVenue)
-    .delete("/venues/:id", (0, auth_1.allowedTo)(Roles_1.Roles.OWNER, Roles_1.Roles.ADMIN), vc.deleteVenue);
+    .get("/venues/:id", venue_validator_1.getVenueValidation, validate_request_1.validateRequest, vc.getVenue)
+    .patch("/venues/:id", (0, fileUpload_1.uploadPhotos)("venues", "photos"), (0, auth_1.allowedTo)(Roles_1.Roles.OWNER), venue_validator_1.updateVenueValidation, validate_request_1.validateRequest, vc.updateVenue)
+    .delete("/venues/:id", venue_validator_1.getVenueValidation, validate_request_1.validateRequest, (0, auth_1.allowedTo)(Roles_1.Roles.OWNER, Roles_1.Roles.ADMIN), vc.deleteVenue);

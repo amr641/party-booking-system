@@ -9,6 +9,7 @@ const multer_1 = __importDefault(require("multer"));
 const fileUpload = (folderName) => {
     const storage = multer_1.default.diskStorage({
         destination: (req, file, cb) => {
+            // console.log(req);
             cb(null, `src/uploads/${folderName}`);
         },
         filename: (req, file, cb) => {
@@ -17,9 +18,15 @@ const fileUpload = (folderName) => {
     });
     const fileFilter = (req, file, cb) => {
         const { mimetype } = file;
-        if (mimetype.startsWith("image") || mimetype == "video/mp4")
+        const allowedTypes = [
+            "image/jpeg",
+            "image/png",
+            "image/gif",
+            "application/pdf",
+        ];
+        if (mimetype.startsWith("image"))
             return cb(null, true);
-        cb(new Error("Invalid file type. Only video files are allowed!"), false);
+        cb(new Error("Invalid file type. Only image files are allowed!"), false);
     };
     const upload = (0, multer_1.default)({
         fileFilter,

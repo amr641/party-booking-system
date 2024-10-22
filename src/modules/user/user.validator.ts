@@ -1,5 +1,5 @@
 import express from "express";
-import { body, param, validationResult } from "express-validator";
+import { body, param } from "express-validator";
 import { AppError } from "../../utils/appError";
 const SignupValidator = [
   body("name").exists({ checkFalsy: true }).isLength({ min: 3 }),
@@ -21,26 +21,27 @@ const loginValidator = [
     .exists({ checkFalsy: true })
     .withMessage("password is required"),
 ];
-const updateUserValidator = param("id")
-  .exists({ checkFalsy: true })
-  .withMessage("id is required")
-  .isHexadecimal()
-  .withMessage(" id must be in hex format");
+const updateUserValidator = [
+  param("id")
+    .exists({ checkFalsy: true })
+    .withMessage("id is required")
+    .isHexadecimal()
+    .withMessage(" id must be in hex format")
+    .escape(),
+  body("name").isLength({ min: 3 }),
+  body("email").isEmail(),
+  body("role").isLength({ max: 5 }),
+];
 const deleteUserValidator = param("id")
   .exists({ checkFalsy: true })
   .withMessage("id is required")
   .isHexadecimal()
-  .withMessage(" id must be in hex format");
+  .withMessage(" id must be in hex format")
+  .escape();
 
-const validateRequest: any = (
-  req: express.Request,
-  res: express.Response,
-  next: express.NextFunction
-) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ erros: errors.array() });
-  }
-  next();
+export {
+  SignupValidator,
+  loginValidator,
+  updateUserValidator,
+  deleteUserValidator,
 };
-export { SignupValidator, loginValidator, validateRequest,updateUserValidator,deleteUserValidator };

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.validateRequest = exports.loginValidator = exports.SignupValidator = void 0;
+exports.deleteUserValidator = exports.updateUserValidator = exports.loginValidator = exports.SignupValidator = void 0;
 const express_validator_1 = require("express-validator");
 const SignupValidator = [
     (0, express_validator_1.body)("name").exists({ checkFalsy: true }).isLength({ min: 3 }),
@@ -24,11 +24,22 @@ const loginValidator = [
         .withMessage("password is required"),
 ];
 exports.loginValidator = loginValidator;
-const validateRequest = (req, res, next) => {
-    const errors = (0, express_validator_1.validationResult)(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ erros: errors.array() });
-    }
-    next();
-};
-exports.validateRequest = validateRequest;
+const updateUserValidator = [
+    (0, express_validator_1.param)("id")
+        .exists({ checkFalsy: true })
+        .withMessage("id is required")
+        .isHexadecimal()
+        .withMessage(" id must be in hex format")
+        .escape(),
+    (0, express_validator_1.body)("name").isLength({ min: 3 }),
+    (0, express_validator_1.body)("email").isEmail(),
+    (0, express_validator_1.body)("role").isLength({ max: 5 }),
+];
+exports.updateUserValidator = updateUserValidator;
+const deleteUserValidator = (0, express_validator_1.param)("id")
+    .exists({ checkFalsy: true })
+    .withMessage("id is required")
+    .isHexadecimal()
+    .withMessage(" id must be in hex format")
+    .escape();
+exports.deleteUserValidator = deleteUserValidator;

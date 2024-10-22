@@ -3,12 +3,13 @@ import * as ua from "../../middlewares/auth";
 import * as uc from "../user/user.controller";
 import { Roles } from "./Roles";
 import { verfifyToken } from "../../middlewares/verifiyToken";
+import { validateRequest } from "../../middlewares/validate-request";
+
 import {
   SignupValidator,
   deleteUserValidator,
   loginValidator,
   updateUserValidator,
-  validateRequest,
 } from "./user.validator";
 
 export const userRouter = Router();
