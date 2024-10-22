@@ -25,7 +25,7 @@ const addVenue = catchError(
 const getAllVenues = catchError(
   async (req: Request, res: Response, next: NextFunction) => {
     let apiFeatuers = new ApiFeatures(
-      Venue.find(),
+      Venue.find().populate("owner", "name email -_id"),
       req.query as unknown as Query
     )
       .select()
@@ -34,7 +34,7 @@ const getAllVenues = catchError(
       .search();
     let { page, limit } = apiFeatuers;
     let venues = await apiFeatuers.mongooseQuery;
-    res.status(200).json({ message: "success", page, limit ,venues });
+    res.status(200).json({ message: "success", page, limit, venues });
   }
 );
 const getVenue = catchError(
@@ -48,23 +48,28 @@ const updateVenue = catchError(
   async (req: Request, res: Response, next: NextFunction) => {
     let venue = await Venue.findById(req.params.id);
     if (!venue) return next(new AppError("venue not found", 404));
-    if (venue.owner !== req.user?.userId)
+    if (venue.owner != req.user?.userId)
       return next(new AppError("not authorized", 403));
     // if the owner provide a photes in Update endpoint
     if (req.files) {
       const oldPhotos = venue?.photos;
       // loop through the old images and remove it from its folder
-      oldPhotos.forEach((photo) => {
-        const photoPath = path.resolve() + "/src/uploads/venues/" + photo;
-        if (fs.existsSync(photoPath)) {
-          fs.unlinkSync(photoPath); // Deletes the file
-          let photosArray = (
-            req.files as { [fieldname: string]: Express.Multer.File[] }
-          )["photos"];
-          req.body.photos = photosArray?.map((img) => img.filename);
-        }
-      });
+      if (oldPhotos.length) {
+        oldPhotos.forEach((photo) => {
+          const photoPath = path.resolve() + "/src/uploads/venues/" + photo;
+          if (fs.existsSync(photoPath)) {
+            fs.unlink(photoPath, (err) => {
+              if (err) console.log(err);
+            }); // Deletes the file
+            let photosArray = (
+              req.files as { [fieldname: string]: Express.Multer.File[] }
+            )["photos"];
+            req.body.photos = photosArray?.map((img) => img.filename);
+          }
+        });
+      }
     }
+
     await Venue.updateOne({ _id: venue._id }, req.body);
     res.status(200).json({ message: "success" });
   }

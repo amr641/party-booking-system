@@ -29,10 +29,11 @@ const ua = __importStar(require("../../middlewares/auth"));
 const uc = __importStar(require("../user/user.controller"));
 const Roles_1 = require("./Roles");
 const verifiyToken_1 = require("../../middlewares/verifiyToken");
+const user_validator_1 = require("./user.validator");
 exports.userRouter = (0, express_1.Router)();
 exports.userRouter
-    .post("/auth/signup", ua.signUp)
-    .post("/auth/login", ua.login)
+    .post("/auth/signup", user_validator_1.SignupValidator, user_validator_1.validateRequest, ua.signUp)
+    .post("/auth/login", user_validator_1.loginValidator, user_validator_1.validateRequest, ua.login)
     .use(verifiyToken_1.verfifyToken)
     .patch("/users/:id", ua.allowedTo(Roles_1.Roles.ADMIN), uc.updateUser)
     .delete("/users/:id", ua.allowedTo(Roles_1.Roles.ADMIN), uc.deleteUser)

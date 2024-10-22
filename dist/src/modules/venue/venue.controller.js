@@ -23,7 +23,7 @@ const addVenue = (0, catchErrors_1.catchError)(async (req, res, next) => {
 });
 exports.addVenue = addVenue;
 const getAllVenues = (0, catchErrors_1.catchError)(async (req, res, next) => {
-    let apiFeatuers = new apiFeatures_1.ApiFeatures(venue_model_1.Venue.find(), req.query)
+    let apiFeatuers = new apiFeatures_1.ApiFeatures(venue_model_1.Venue.find().populate("owner", "name email -_id"), req.query)
         .select()
         .filter()
         .sort()
@@ -43,20 +43,25 @@ const updateVenue = (0, catchErrors_1.catchError)(async (req, res, next) => {
     let venue = await venue_model_1.Venue.findById(req.params.id);
     if (!venue)
         return next(new appError_1.AppError("venue not found", 404));
-    if (venue.owner !== req.user?.userId)
+    if (venue.owner != req.user?.userId)
         return next(new appError_1.AppError("not authorized", 403));
     // if the owner provide a photes in Update endpoint
     if (req.files) {
         const oldPhotos = venue?.photos;
         // loop through the old images and remove it from its folder
-        oldPhotos.forEach((photo) => {
-            const photoPath = path_1.default.resolve() + "/src/uploads/venues/" + photo;
-            if (fs_1.default.existsSync(photoPath)) {
-                fs_1.default.unlinkSync(photoPath); // Deletes the file
-                let photosArray = req.files["photos"];
-                req.body.photos = photosArray?.map((img) => img.filename);
-            }
-        });
+        if (oldPhotos.length) {
+            oldPhotos.forEach((photo) => {
+                const photoPath = path_1.default.resolve() + "/src/uploads/venues/" + photo;
+                if (fs_1.default.existsSync(photoPath)) {
+                    fs_1.default.unlink(photoPath, (err) => {
+                        if (err)
+                            console.log(err);
+                    }); // Deletes the file
+                    let photosArray = req.files["photos"];
+                    req.body.photos = photosArray?.map((img) => img.filename);
+                }
+            });
+        }
     }
     await venue_model_1.Venue.updateOne({ _id: venue._id }, req.body);
     res.status(200).json({ message: "success" });
