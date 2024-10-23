@@ -12,6 +12,9 @@ const venueSchema = new Schema(
       type: String,
       minLength: [3, "name too short"],
     },
+    status:{
+
+    },
     desc: {
       type: String,
     },

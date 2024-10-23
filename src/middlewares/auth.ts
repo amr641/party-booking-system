@@ -4,18 +4,12 @@ import jwt from "jsonwebtoken";
 import { User } from "../modules/user/user.model";
 import { catchError } from "./catchErrors";
 import { AppError } from "../utils/appError";
-import { IRoles, Roles } from "../modules/user/Roles";
-
 // user signing up
 const signUp = catchError(
   async (req: Request, res: Response, next: NextFunction) => {
-    let Admins = ["amr@gamil.com"];
     let user = await User.findOne({ email: req.body.email });
     if (user)
       return next(new AppError("email already exist please login", 403));
-    // if the user is in the admins list signhim up as an admin
-    if (Admins.includes(req.body.email))req.body.role = Roles.ADMIN;
-  
       req.body.password = bcrypt.hashSync(req.body.password, 10);
       user=  await User.create(req.body);
       let token = jwt.sign(

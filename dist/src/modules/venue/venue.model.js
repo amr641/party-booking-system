@@ -13,6 +13,7 @@ const venueSchema = new mongoose_2.Schema({
         type: String,
         minLength: [3, "name too short"],
     },
+    status: {},
     desc: {
         type: String,
     },
@@ -35,7 +36,8 @@ const venueSchema = new mongoose_2.Schema({
     },
 }, { versionKey: false });
 venueSchema.post("find", (doc) => {
+    var _a;
     let url = process.env.BASE_URL + "uploads/venues/";
-    doc.photos = doc.photos?.map((image) => url + image);
+    doc.photos = (_a = doc.photos) === null || _a === void 0 ? void 0 : _a.map((image) => url + image);
 });
 exports.Venue = (0, mongoose_2.model)("Venue", venueSchema);

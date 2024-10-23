@@ -2,13 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ApiFeatures = void 0;
 class ApiFeatures {
-    mongooseQuery;
-    searchQuery;
-    limit = 5;
-    page = 1;
     constructor(mongooseQuery, searchQuery) {
         this.mongooseQuery = mongooseQuery;
         this.searchQuery = searchQuery;
+        this.limit = 5;
+        this.page = 1;
     }
     pagination() {
         let page = Math.abs(Number(this.searchQuery.page)) || 1;
