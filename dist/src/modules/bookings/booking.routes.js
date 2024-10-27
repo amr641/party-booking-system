@@ -5,7 +5,12 @@ const express_1 = require("express");
 const booking_controller_1 = require("./booking.controller");
 const auth_1 = require("../../middlewares/auth");
 const Roles_1 = require("../user/Roles");
+const paymets_1 = require("../../utils/paymets");
+const verifiyToken_1 = require("../../middlewares/verifiyToken");
 exports.bookingRouter = (0, express_1.Router)();
-exports.bookingRouter.post("/book-venue/:id", (0, auth_1.allowedTo)(Roles_1.Roles.USER), booking_controller_1.bookVenue);
-exports.bookingRouter.patch("/cancel-booking/:id", (0, auth_1.allowedTo)(Roles_1.Roles.USER), booking_controller_1.cancelBooking);
-exports.bookingRouter.get("/get-user-bookings", (0, auth_1.allowedTo)(Roles_1.Roles.USER), booking_controller_1.getUserBookings);
+exports.bookingRouter
+    .get("/success-payment/:id", booking_controller_1.displayMessage)
+    .use(verifiyToken_1.verfifyToken)
+    .post("/book-venue/:id", (0, auth_1.allowedTo)(Roles_1.Roles.USER), booking_controller_1.bookVenue, paymets_1.createCheckOutSessions)
+    .patch("/cancel-booking/:id", (0, auth_1.allowedTo)(Roles_1.Roles.USER), booking_controller_1.cancelBooking)
+    .get("/get-user-bookings", (0, auth_1.allowedTo)(Roles_1.Roles.USER), booking_controller_1.getUserBookings);

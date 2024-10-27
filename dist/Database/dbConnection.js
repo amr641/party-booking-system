@@ -4,13 +4,28 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.dbConn = void 0;
+const sequelize_1 = require("sequelize");
 const mongoose_1 = __importDefault(require("mongoose"));
 const dbConn = () => {
-    mongoose_1.default.connect("mongodb://localhost:27017/booking-party")
+    mongoose_1.default
+        .connect("mongodb://localhost:27017/booking-party")
         .then(() => {
-        console.log('DB connected');
-    }).catch(() => {
-        console.log('Err DB Connection');
+        console.log("DB connected");
+    })
+        .catch(() => {
+        console.log("Err DB Connection");
     });
 };
 exports.dbConn = dbConn;
+const sequelize = new sequelize_1.Sequelize("party-booking system", "root", "", {
+    host: "localhost",
+    dialect: "mysql",
+});
+// test database connection
+sequelize
+    .authenticate()
+    .then(() => {
+    console.log("Connection has been established successfully.");
+})
+    .catch((err) => console.error("Unable to connect to the database:"));
+exports.default = sequelize;

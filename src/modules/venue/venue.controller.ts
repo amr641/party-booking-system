@@ -6,6 +6,7 @@ import path from "path";
 import fs from "fs";
 import { Roles } from "../user/Roles";
 import { ApiFeatures, Query } from "../../utils/apiFeatures";
+import { IVenue } from "./venueINTF";
 
 const addVenue = catchError(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -39,14 +40,14 @@ const getAllVenues = catchError(
 );
 const getVenue = catchError(
   async (req: Request, res: Response, next: NextFunction) => {
-    let venue = await Venue.findById(req.params.id);
+    let venue:IVenue|null = await Venue.findById(req.params.id);
     venue || next(new AppError("venue not found", 404));
     !venue || res.status(200).json({ message: "success", venue });
   }
 );
 const updateVenue = catchError(
   async (req: Request, res: Response, next: NextFunction) => {
-    let venue = await Venue.findById(req.params.id);
+    let venue:IVenue|null = await Venue.findById(req.params.id);
     if (!venue) return next(new AppError("venue not found", 404));
     if (venue.owner != req.user?.userId)
       return next(new AppError("not authorized", 403));
