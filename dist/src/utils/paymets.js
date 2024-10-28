@@ -42,5 +42,5 @@ exports.createCheckOutSessions = (0, catchErrors_1.catchError)(async (req, res, 
         email: session.customer_email,
         payment_status: session.payment_status,
     });
-    res.status(200).json({ message: "success", session });
+    res.status(200).json({ message: "success", url: session.url });
 });
