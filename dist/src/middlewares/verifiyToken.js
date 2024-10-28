@@ -9,7 +9,7 @@ const appError_1 = require("../utils/appError");
 const user_model_1 = require("../modules/user/user.model");
 const verfifyToken = (req, res, next) => {
     const token = req.headers?.token;
-    jsonwebtoken_1.default.verify(token, "secret", async (err, decoded) => {
+    jsonwebtoken_1.default.verify(token, process.env.JWT_KEY, async (err, decoded) => {
         if (err)
             return next(new appError_1.AppError("inavlid token", 401));
         let user = await user_model_1.User.findById(decoded.userId);

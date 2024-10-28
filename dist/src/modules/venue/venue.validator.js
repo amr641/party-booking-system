@@ -1,8 +1,12 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.updateVenueValidation = exports.getVenueValidation = exports.createVenueValidation = void 0;
 const express_validator_1 = require("express-validator");
 const appError_1 = require("../../utils/appError");
+const moment_1 = __importDefault(require("moment"));
 const createVenueValidation = [
     (0, express_validator_1.body)("name")
         .exists({ checkFalsy: true })
@@ -22,7 +26,28 @@ const createVenueValidation = [
         .withMessage("price must be a positive number"),
     (0, express_validator_1.body)("availability")
         .exists({ checkFalsy: true })
-        .withMessage("availability is required "),
+        .withMessage("availability is required ")
+        .custom((value, { req }) => {
+        if (!Array.isArray(value)) {
+            throw new Error("Availability must be an array of dates");
+        }
+        const today = (0, moment_1.default)().startOf("day");
+        const datesSet = new Set();
+        value.forEach((date) => {
+            if (!(0, moment_1.default)(date, "MM/DD/YYYY", true).isValid()) {
+                throw new Error("Invalid date format");
+            }
+            if ((0, moment_1.default)(date, "MM/DD/YYYY").isSameOrBefore(today)) {
+                throw new Error("Date must be greater than today");
+            }
+            if (datesSet.has(date)) {
+                throw new Error("Dates must be unique");
+            }
+            datesSet.add(date);
+        });
+        return true;
+    })
+        .withMessage("Date must be in the format MM/DD/YYYY, greater than today, and unique"),
     (0, express_validator_1.body)("capacity")
         .exists({ checkFalsy: true })
         .withMessage("capacity is required")

@@ -21,7 +21,7 @@ const signUp = (0, catchErrors_1.catchError)(async (req, res, next) => {
         name: user.name,
         email: user.email,
         role: user.role,
-    }, "secret");
+    }, process.env.JWT_KEY);
     return res.status(201).json({ message: "success", token });
 });
 exports.signUp = signUp;
@@ -30,7 +30,7 @@ const login = (0, catchErrors_1.catchError)(async (req, res, next) => {
     if (!user || !bcrypt_1.default.compare(req.body.password, user.password))
         return next(new appError_1.AppError("incorrect email or password", 403));
     // sign a token
-    let token = jsonwebtoken_1.default.sign({ userId: user._id, name: user.name, email: user.email, role: user.role }, "secret");
+    let token = jsonwebtoken_1.default.sign({ userId: user._id, name: user.name, email: user.email, role: user.role }, process.env.JWT_KEY);
     return res
         .status(201)
         .json({ message: `welcome back ${user.name}`, token });

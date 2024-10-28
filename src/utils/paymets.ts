@@ -6,9 +6,10 @@ import { Booking } from "../modules/bookings/booking.model";
 import { Transaction } from "../../Database/transaction.model";
 import { IVenue } from "../modules/venue/venueINTF";
 import { IBooking } from "../modules/bookings/bookingINTF";
-const stripe = new Stripe(
-  "sk_test_51QEXMcDxHURjLhJB5TpPFArhWAdPlOtHkLILenomS74N8YjJ4XLqsUVzLRCCOCLVZNTgB6xb7rQHCDbcTNJ5Vmep00dP15RWO4"
-);
+import dotenv from "dotenv"
+dotenv.config()
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string) 
+
 export let createCheckOutSessions = catchError(
   async (req: Request, res: Response, next: NextFunction) => {
     let venue: IVenue | null = await Venue.findById(req.params.id);

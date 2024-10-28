@@ -2,7 +2,7 @@ import { Sequelize } from "sequelize";
 import mongoose from "mongoose";
 export const dbConn = (): void => {
   mongoose
-    .connect("mongodb://localhost:27017/booking-party")
+    .connect(process.env.DB_URI as string)
     .then(() => {
       console.log("DB connected");
     })

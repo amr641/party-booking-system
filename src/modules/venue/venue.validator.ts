@@ -1,5 +1,6 @@
 import { body, param } from "express-validator";
 import { AppError } from "../../utils/appError";
+import moment from "moment";
 
 const createVenueValidation = [
   body("name")
@@ -24,7 +25,33 @@ const createVenueValidation = [
 
   body("availability")
     .exists({ checkFalsy: true })
-    .withMessage("availability is required "),
+    .withMessage("availability is required ")
+    .custom((value, { req }) => {
+      if (!Array.isArray(value)) {
+        throw new Error("Availability must be an array of dates");
+      }
+
+      const today = moment().startOf("day");
+      const datesSet = new Set();
+
+      value.forEach((date) => {
+        if (!moment(date, "MM/DD/YYYY", true).isValid()) {
+          throw new Error("Invalid date format");
+        }
+        if (moment(date, "MM/DD/YYYY").isSameOrBefore(today)) {
+          throw new Error("Date must be greater than today");
+        }
+        if (datesSet.has(date)) {
+          throw new Error("Dates must be unique");
+        }
+        datesSet.add(date);
+      });
+
+      return true;
+    })
+    .withMessage(
+      "Date must be in the format MM/DD/YYYY, greater than today, and unique"
+    ),
 
   body("capacity")
     .exists({ checkFalsy: true })

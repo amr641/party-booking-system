@@ -45,9 +45,9 @@ class ApiFeatures {
             this.searchQuery.search = this.searchQuery.search.replace(/,/g, " ");
             this.mongooseQuery.find({
                 $or: [
-                    { tags: { $regex: this.searchQuery.search, $options: "i" } },
-                    { category: { $regex: this.searchQuery.search, $options: "i" } },
-                    { content: { $regex: this.searchQuery.search, $options: "i" } },
+                    { location: { $regex: this.searchQuery.search, $options: "i" } },
+                    { desc: { $regex: this.searchQuery.search, $options: "i" } },
+                    { name: { $regex: this.searchQuery.search, $options: "i" } },
                 ],
             });
         }

@@ -8,7 +8,7 @@ const sequelize_1 = require("sequelize");
 const mongoose_1 = __importDefault(require("mongoose"));
 const dbConn = () => {
     mongoose_1.default
-        .connect("mongodb://localhost:27017/booking-party")
+        .connect(process.env.DB_URI)
         .then(() => {
         console.log("DB connected");
     })

@@ -9,10 +9,14 @@ const catchErrors_1 = require("../middlewares/catchErrors");
 const venue_model_1 = require("../modules/venue/venue.model");
 const booking_model_1 = require("../modules/bookings/booking.model");
 const transaction_model_1 = require("../../Database/transaction.model");
-const stripe = new stripe_1.default("sk_test_51QEXMcDxHURjLhJB5TpPFArhWAdPlOtHkLILenomS74N8YjJ4XLqsUVzLRCCOCLVZNTgB6xb7rQHCDbcTNJ5Vmep00dP15RWO4");
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
+const stripe = new stripe_1.default(process.env.STRIPE_SECRET_KEY);
 exports.createCheckOutSessions = (0, catchErrors_1.catchError)(async (req, res, next) => {
     let venue = await venue_model_1.Venue.findById(req.params.id);
-    let booking = await booking_model_1.Booking.findOne({ date: req.body.date });
+    let booking = await booking_model_1.Booking.findOne({
+        date: req.body.date,
+    });
     let session = await stripe.checkout.sessions.create({
         line_items: [
             {

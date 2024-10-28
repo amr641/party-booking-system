@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import { User } from "../modules/user/user.model";
 import { catchError } from "./catchErrors";
 import { AppError } from "../utils/appError";
+import dotEnv from "dotenv"
 // user signing up
 const signUp = catchError(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -19,7 +20,7 @@ const signUp = catchError(
           email: user!.email,
           role: user!.role,
         },
-        "secret"
+        process.env.JWT_KEY as string
       );
       return res.status(201).json({ message: "success", token });
     }
@@ -34,7 +35,7 @@ const login = catchError(
     // sign a token
     let token = jwt.sign(
       { userId: user._id, name: user.name, email: user.email,role:user.role },
-      "secret"
+      process.env.JWT_KEY as string
     );
     return res
       .status(201)
