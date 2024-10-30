@@ -12,7 +12,7 @@ import { IVenue } from "../venue/venueINTF";
 const bookVenue = catchError(
   async (req: Request, res: Response, next: NextFunction) => {
     // first get the venue and check if it exsist or not
-    let venue:IVenue|null = await Venue.findById(req.params.id);
+    let venue: IVenue | null = await Venue.findById(req.params.id);
     if (!venue) return next(new AppError("venue not found", 404));
     // then check the date
     let { date } = req.body;
@@ -57,11 +57,19 @@ const getUserBookings = catchError(
     if (!bookings.length)
       return next(new AppError("You Did not book any venue Yet", 404));
     bookings.forEach(async (ele) => {
-      if (formatDateToMMDDYY(new Date()) == formatDateToMMDDYY(ele.date))
-        ele.status = Status.confirmed;
       if (
+        formatDateToMMDDYY(new Date()) == formatDateToMMDDYY(ele.date) &&
+        ele.paymentInfo == "paid"
+      )
+        ele.status = Status.confirmed;
+      else if (
         ele.status == Status.confirmed &&
         formatDateToMMDDYY(new Date()) > formatDateToMMDDYY(ele.date)
+      )
+        await ele.deleteOne({ _id: String(ele._id) });
+      else if (
+        formatDateToMMDDYY(new Date()) >= formatDateToMMDDYY(ele.date) &&
+        ele.paymentInfo == "unpaid"
       )
         await ele.deleteOne({ _id: String(ele._id) });
 
@@ -73,13 +81,15 @@ const getUserBookings = catchError(
 
 const displayMessage = catchError(
   async (req: Request, res: Response, next: NextFunction) => {
-    await Booking.updateOne({_id:req.params.id},{ paymentInfo: "paid" });
-    await Transaction.update({payment_status:"paid"},{
-      where:{
-        email:req.user?.email
+    await Booking.updateOne({ _id: req.params.id }, { paymentInfo: "paid" });
+    await Transaction.update(
+      { payment_status: "paid" },
+      {
+        where: {
+          email: req.user?.email,
+        },
       }
-
-    })
+    );
     res.status(200).json({ message: "successful payment" });
   }
 );

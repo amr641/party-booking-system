@@ -55,10 +55,14 @@ const getUserBookings = (0, catchErrors_1.catchError)(async (req, res, next) => 
     if (!bookings.length)
         return next(new appError_1.AppError("You Did not book any venue Yet", 404));
     bookings.forEach(async (ele) => {
-        if ((0, datehandeling_1.formatDateToMMDDYY)(new Date()) == (0, datehandeling_1.formatDateToMMDDYY)(ele.date))
+        if ((0, datehandeling_1.formatDateToMMDDYY)(new Date()) == (0, datehandeling_1.formatDateToMMDDYY)(ele.date) &&
+            ele.paymentInfo == "paid")
             ele.status = status_1.Status.confirmed;
-        if (ele.status == status_1.Status.confirmed &&
+        else if (ele.status == status_1.Status.confirmed &&
             (0, datehandeling_1.formatDateToMMDDYY)(new Date()) > (0, datehandeling_1.formatDateToMMDDYY)(ele.date))
+            await ele.deleteOne({ _id: String(ele._id) });
+        else if ((0, datehandeling_1.formatDateToMMDDYY)(new Date()) >= (0, datehandeling_1.formatDateToMMDDYY)(ele.date) &&
+            ele.paymentInfo == "unpaid")
             await ele.deleteOne({ _id: String(ele._id) });
         await ele.save();
     });
@@ -69,8 +73,8 @@ const displayMessage = (0, catchErrors_1.catchError)(async (req, res, next) => {
     await booking_model_1.Booking.updateOne({ _id: req.params.id }, { paymentInfo: "paid" });
     await transaction_model_1.Transaction.update({ payment_status: "paid" }, {
         where: {
-            email: req.user?.email
-        }
+            email: req.user?.email,
+        },
     });
     res.status(200).json({ message: "successful payment" });
 });

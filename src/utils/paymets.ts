@@ -6,9 +6,10 @@ import { Booking } from "../modules/bookings/booking.model";
 import { Transaction } from "../../Database/transaction.model";
 import { IVenue } from "../modules/venue/venueINTF";
 import { IBooking } from "../modules/bookings/bookingINTF";
-import dotenv from "dotenv"
-dotenv.config()
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string) 
+import dotenv from "dotenv";
+import { AppError } from "./appError";
+dotenv.config();
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
 export let createCheckOutSessions = catchError(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -36,11 +37,13 @@ export let createCheckOutSessions = catchError(
       client_reference_id: req.user?.userId,
     });
     // storing transactions in the sql database
-    let transaction = await Transaction.create({
+    await Transaction.create({
       amount_total: session.amount_total,
       email: session.customer_email,
       payment_status: session.payment_status,
+    }).catch((err) => {
+      if (err) return next(new AppError("you can only book one venue", 405));
     });
-    res.status(200).json({ message: "success", url:session.url });
+    res.status(200).json({ message: "success", url: session.url });
   }
 );

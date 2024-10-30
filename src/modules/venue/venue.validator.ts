@@ -1,6 +1,7 @@
 import { body, param } from "express-validator";
 import { AppError } from "../../utils/appError";
 import moment from "moment";
+import { formatDateToMMDDYY } from "../bookings/datehandeling";
 
 const createVenueValidation = [
   body("name")
@@ -36,11 +37,13 @@ const createVenueValidation = [
 
       value.forEach((date) => {
         if (!moment(date, "MM/DD/YYYY", true).isValid()) {
+          console.error(`invalida dateformat ${date}`);
           throw new Error("Invalid date format");
         }
-        if (moment(date, "MM/DD/YYYY").isSameOrBefore(today)) {
+        if (date<= formatDateToMMDDYY(new Date())) {
           throw new Error("Date must be greater than today");
         }
+
         if (datesSet.has(date)) {
           throw new Error("Dates must be unique");
         }
@@ -49,9 +52,7 @@ const createVenueValidation = [
 
       return true;
     })
-    .withMessage(
-      "Date must be in the format MM/DD/YYYY, greater than today, and unique"
-    ),
+   ,
 
   body("capacity")
     .exists({ checkFalsy: true })

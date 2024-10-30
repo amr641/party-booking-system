@@ -11,7 +11,7 @@ export const dbConn = (): void => {
     });
 };
 const sequelize = new Sequelize("party-booking system", "root", "", {
-  host: "localhost",
+  host: process.env.MYSQL_BASE_URI as string,
   dialect: "mysql",
 });
 // test database connection

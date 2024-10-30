@@ -7,6 +7,7 @@ exports.updateVenueValidation = exports.getVenueValidation = exports.createVenue
 const express_validator_1 = require("express-validator");
 const appError_1 = require("../../utils/appError");
 const moment_1 = __importDefault(require("moment"));
+const datehandeling_1 = require("../bookings/datehandeling");
 const createVenueValidation = [
     (0, express_validator_1.body)("name")
         .exists({ checkFalsy: true })
@@ -35,9 +36,10 @@ const createVenueValidation = [
         const datesSet = new Set();
         value.forEach((date) => {
             if (!(0, moment_1.default)(date, "MM/DD/YYYY", true).isValid()) {
+                console.error(`invalida dateformat ${date}`);
                 throw new Error("Invalid date format");
             }
-            if ((0, moment_1.default)(date, "MM/DD/YYYY").isSameOrBefore(today)) {
+            if (date <= (0, datehandeling_1.formatDateToMMDDYY)(new Date())) {
                 throw new Error("Date must be greater than today");
             }
             if (datesSet.has(date)) {
@@ -46,8 +48,7 @@ const createVenueValidation = [
             datesSet.add(date);
         });
         return true;
-    })
-        .withMessage("Date must be in the format MM/DD/YYYY, greater than today, and unique"),
+    }),
     (0, express_validator_1.body)("capacity")
         .exists({ checkFalsy: true })
         .withMessage("capacity is required")
